@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:padding="16dp"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    tools:ignore="MergeRootFrame" >
+
+    <LinearLayout
+        android:layout_marginBottom="16dp"
+        android:padding="10dp"
+        android:layout_weight="4"
+        android:background="#BBDEFB"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        >
+
+        <EditText
+            android:id="@+id/etLocation"
+            android:hint="Location"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content" />
+
+        <ImageButton
+            android:id="@+id/btnCurrentLocation"
+            android:src="@android:drawable/ic_dialog_map"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/btnSearch"
+            android:text="SEARCH"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:layout_weight="1"
+        android:id="@+id/container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        </LinearLayout>
+
+    </LinearLayout>
