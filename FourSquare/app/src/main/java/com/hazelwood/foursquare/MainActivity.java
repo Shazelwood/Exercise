@@ -115,7 +115,7 @@ public class MainActivity extends ActionBarActivity implements FragmentList.List
             dialog = new ProgressDialog(MainActivity.this);
             dialog.setProgressStyle((ProgressDialog.STYLE_HORIZONTAL));
             dialog.setIndeterminate(true);
-            dialog.setProgressNumberFormat("Copyright (c) 2014 The New York Times Company. All Rights Reserved.");
+            dialog.setProgressNumberFormat("Please wait..");
             dialog.setProgressPercentFormat(null);
             dialog.setCancelable(false);
             dialog.show();
