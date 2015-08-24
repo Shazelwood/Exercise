@@ -3,9 +3,11 @@ package com.hazelwood.foursquare;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,8 @@ import java.util.ArrayList;
 public class FragmentList extends Fragment {
     private static final String ARG = "FOURSQUARE";
     private Serializable mParam;
+    ListView listView;
+    Task task;
 
     public FragmentList() {}
     private ListFragmentListener mListener;
@@ -28,10 +32,10 @@ public class FragmentList extends Fragment {
         public void getURL(String url);
     }
 
-    public static FragmentList newInstance(ArrayList<Venue> strings) {
+    public static FragmentList newInstance(String location) {
         FragmentList fragment = new FragmentList();
         Bundle args = new Bundle();
-        args.putSerializable(ARG, strings);
+        args.putString(ARG, location);
         fragment.setArguments(args);
         return fragment;
     }
@@ -40,7 +44,7 @@ public class FragmentList extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam = getArguments().getSerializable(ARG);
+            mParam = getArguments().getString(ARG);
         }
     }
 
@@ -65,23 +69,78 @@ public class FragmentList extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         Bundle args = getArguments();
-        final ArrayList<Venue> venuesArrayList = (ArrayList<Venue>) args.getSerializable(ARG);
+        String location = args.getString(ARG);
+        runTask(location);
 
-        ListView listView = (ListView) getActivity().findViewById(R.id.list_view);
+        listView = (ListView) getActivity().findViewById(R.id.list_view);
+    }
 
-        ListAdapter listAdapter = new ListAdapter(getActivity(), venuesArrayList);
+    public void runTask(String location){
+        stopTask();
+        task = new Task();
+        task.execute(location);
+    }
 
-        listView.setAdapter(listAdapter);
+    public void stopTask(){
+        if (task != null){
+            task.cancel(false);
+            task = null;
+        }
+    }
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Venue venue = venuesArrayList.get(position);
-                itemChoiceDialog(venue.getName(), venue.getContactNumber(), venue.getAddress());
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+        stopTask();
+    }
 
-            }
-        });
+    public class Task extends AsyncTask<String, Void, ArrayList<Venue>> {
+        ProgressDialog dialog;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = new ProgressDialog(getActivity());
+            dialog.setProgressStyle((ProgressDialog.STYLE_HORIZONTAL));
+            dialog.setIndeterminate(true);
+            dialog.setProgressNumberFormat("Getting Venues..");
+            dialog.setProgressPercentFormat(null);
+            dialog.setCancelable(false);
+            dialog.show();
+        }
 
+        @Override
+        protected ArrayList<Venue> doInBackground(String... params) {
+
+            ArrayList<Venue> venues = null;
+
+            venues = ListHelper.getVenues(params[0]);
+
+            return venues;
+
+        }
+
+        @Override
+        protected void onPostExecute(final ArrayList<Venue> strings) {
+            super.onPostExecute(strings);
+            dialog.dismiss();
+
+            task = null;
+
+            ListAdapter listAdapter = new ListAdapter(getActivity(), strings);
+
+            listView.setAdapter(listAdapter);
+
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    Venue venue = strings.get(position);
+                    itemChoiceDialog(venue.getName(), venue.getContactNumber(), venue.getAddress());
+
+                }
+            });
+
+        }
     }
 
     public void itemChoiceDialog(String name, final String number, final String address) {
@@ -112,11 +171,5 @@ public class FragmentList extends Fragment {
             }
         });
         alertDialog.show();
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
     }
 }
